@@ -1,0 +1,9 @@
+{
+	"port": "8485",
+	"caspio": {
+	    "baseUrl": "https://",
+	    "clientId": "",
+	    "clientSecret": "",
+	    "grandType": "client_credentials"
+	  }
+}
