@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Получение пользователей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Список пользователей</h1>
+    <button id="fetch-users">Загрузить пользователей</button>
+    <div id="filters">
+        <input type="text" id="filter-name" placeholder="Имя" />
+        <input type="text" id="filter-lastname" placeholder="Фамилия" />
+        <input type="text" id="filter-country" placeholder="Страна" />
+        <input type="text" id="filter-city" placeholder="Город" />
+        <button id="apply-filters">Применить фильтры</button>
+    </div>    
+    <h2>Результаты:</h2>
+    <table id="result">
+        <thead>
+            <tr>
+                <th>PK_ID</th>
+                <th>UserID</th>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Дата рождения</th>
+                <th>Страна</th>
+                <th>Город</th>
+                <th>Почтовый код</th>
+                <th>Адрес</th>
+                <th>Дата добавления</th>
+                <th>Дата обновления</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Данные пользователей будут добавляться сюда -->
+        </tbody>
+    </table>
+
+    <script>
+        let usersData = []; // Переменная для хранения загруженных данных
+    
+        document.getElementById('fetch-users').addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://localhost:3000/'); // Если обращение к /users идёт не с того же хоста где запущен веб сервер, то необходимо localhost поменять на адрес веб сервера
+                if (!response.ok) {
+                    throw new Error('Сетевая ошибка: ' + response.statusText);
+                }
+                usersData = await response.json(); // Сохраняем данные в переменной
+                renderTable(usersData); // Отображаем данные
+            } catch (error) {
+                const tbody = document.getElementById('result').querySelector('tbody');
+                tbody.innerHTML = `<tr><td colspan="11">Ошибка: ${error.message}</td></tr>`;
+            }
+        });
+    
+        function renderTable(data) {
+            const tbody = document.getElementById('result').querySelector('tbody');
+            tbody.innerHTML = ''; // Очистка предыдущих данных
+    
+            data.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.PK_ID}</td>
+                    <td>${user.UserID}</td>
+                    <td>${user.FirstName}</td>
+                    <td>${user.LastName}</td>
+                    <td>${new Date(user.DateOfBirth).toLocaleDateString('ru-RU')}</td>
+                    <td>${user.Country}</td>
+                    <td>${user.City}</td>
+                    <td>${user.ZipCode}</td>
+                    <td>${user.Address}</td>
+                    <td>${new Date(user.AddedTimestamp).toLocaleString('ru-RU')}</td>
+                    <td>${new Date(user.UpdatesTimestamp).toLocaleString('ru-RU')}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    
+        document.getElementById('apply-filters').addEventListener('click', () => {
+            const nameFilter = document.getElementById('filter-name').value.toLowerCase();
+            const lastnameFilter = document.getElementById('filter-lastname').value.toLowerCase();
+            const countryFilter = document.getElementById('filter-country').value.toLowerCase();
+            const cityFilter = document.getElementById('filter-city').value.toLowerCase();
+            
+            const filteredData = usersData.filter(user => {
+                return (!nameFilter || user.FirstName.toLowerCase().includes(nameFilter)) &&
+                       (!lastnameFilter || user.LastName.toLowerCase().includes(lastnameFilter)) &&
+                       (!countryFilter || user.Country.toLowerCase().includes(countryFilter)) &&
+                       (!cityFilter || user.City.toLowerCase().includes(cityFilter));
+            });
+    
+            renderTable(filteredData); // Отображаем отфильтрованные данные
+        });
+    </script>
+    
+</body>
+</html>

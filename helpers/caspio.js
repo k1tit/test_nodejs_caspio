@@ -1,6 +1,7 @@
 import request from 'request';
 import rp from 'request-promise';
 import config from '../config/config.json';
+var logger = require('morgan');
 
 export class CaspioHelper {
     async getAccessToken() {
@@ -93,7 +94,7 @@ export class CaspioHelper {
     async put(resource, ressource_name, query, data_for_update, token) {
         try {
             let options = {
-                url: `${config.caspio.baseUrl}/rest/v2/${resource}/${ressource_name}/records?response=rows&${query}`,
+                url: `${config.caspio.baseUrl}/rest/v2/${resource}/${ressource_name}/records?response=rows&q.where=UserID%3D\'${query}\'`,
                 method: 'put',
                 json: data_for_update,
                 auth: {
@@ -106,7 +107,7 @@ export class CaspioHelper {
             return response;
         }
         catch (err) {
-            logger.error(JSON.stringify(err));
+            console.error(JSON.stringify(err));
             return false;
         }
     }
@@ -127,7 +128,7 @@ export class CaspioHelper {
 
     async deleteRows(resource, ressource_name, query, token) {
         let options = {
-            url: `${config.caspio.baseUrl}/rest/v2/${resource}/${ressource_name}/records?${query}`,
+            url: `${config.caspio.baseUrl}/rest/v2/${resource}/${ressource_name}/records?q.where=UserID%3D\'${query}\'`,
             method: 'delete',
             auth: {
                 'bearer': token
